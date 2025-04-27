@@ -1,9 +1,13 @@
+# Name of the workflow
 name: Generate Release Notes
 
+#  Run on every commit tag which begins with 'v' (e.g. v1.2.0)
 on:
   push:
     tags:
-      - 'v*.*.*' # example: v1.0.0, v1.1.0
+      - 'v*.*.*'
+
+# Automatically create a Github Release, with release details specifies (the relevent commits)
 
 jobs:
   release:
