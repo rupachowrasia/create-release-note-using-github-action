@@ -1,0 +1,24 @@
+# .github/workflows/release.yml
+
+name: Generate Release Notes
+
+on:
+  push:
+    tags:
+      - 'v*.*.*' # example: v1.0.0, v1.1.0
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Generate Release Notes
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
