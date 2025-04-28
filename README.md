@@ -28,10 +28,10 @@ git push origin v1.1.0
 
 ```bash
 # Clone the repo
-git clone https://github.com/rupachowrasia/github-release-note-template.git
+git clone https://github.com/rupachowrasia/create-release-note-using-github-action.git
 
 # Move into the project directory
-cd github-release-note-template
+cd create-release-note-using-github-action
 
 # Install dependencies
 npm install
