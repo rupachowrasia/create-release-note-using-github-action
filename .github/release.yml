@@ -7,6 +7,9 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  contents: write 
+
 # Automatically create a Github Release, with release details specifies (the relevent commits)
 
 jobs:
