@@ -17,26 +17,24 @@ jobs:
     name: Create GitHub Release Notes
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Generate Release Notes
-        uses:  softprops/action-gh-release@v2
-        with:
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
-
     # steps:
-    #   - name: Create release
+    #   - name: Checkout Repository
+    #     uses: actions/checkout@v3
+
+    #   - name: Generate Release Notes
+    #     uses:  softprops/action-gh-release@v2
+    #     with:
+    #       generate_release_notes: true
     #     env:
     #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #       tag: ${{ github.ref_name }}
-    #     run: |
-    #       gh release create "$tag" \
-    #           --repo="$GITHUB_REPOSITORY" \
-    #           --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
-    #           --generate-notes
+
+    steps:
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: |
+          gh release create "$tag" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
+              --generate-notes
