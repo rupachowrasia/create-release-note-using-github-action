@@ -1,40 +1,120 @@
-# Name of the workflow
-name: Generate Release Notes
+# # Name of the workflow
+# name: Generate Release Notes
 
-#  Run on every commit tag which begins with 'v' (e.g. v1.2.0)
+# #  Run on every commit tag which begins with 'v' (e.g. v1.2.0)
+# on:
+#   push:
+#     tags:
+#       - v*
+
+# permissions:
+#   contents: write 
+
+# # Automatically create a Github Release, with release details specifies (the relevent commits)
+
+# jobs:
+#   release:
+#     name: Create GitHub Release Notes
+#     runs-on: ubuntu-latest
+
+#     # steps:
+#     #   - name: Checkout Repository
+#     #     uses: actions/checkout@v3
+
+#     #   - name: Generate Release Notes
+#     #     uses:  softprops/action-gh-release@v2
+#     #     with:
+#     #       generate_release_notes: true
+#     #     env:
+#     #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEname: Create GitHub Release
+
+# on:
+#   push:
+#     tags:
+#       - 'v*'   # Triggers on tags like v1.0.0, v2.3.1, etc.
+
+# permissions:
+#   contents: write   # Required to create the release
+
+# jobs:
+#   release:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+
+#       - name: Create GitHub Release with Notes
+#         uses: softprops/action-gh-release@v1
+#         with:
+#           generate_release_notes: true
+# N }}
+
+#     steps:
+#       - name: Create release
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           tag: ${{ github.ref_name }}
+#         run: |
+#           gh release create "$tag" \
+#               --repo="$GITHUB_REPOSITORY" \
+#               --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
+#               --generate-notes
+
+name: Auto Tag and Create Release
+
 on:
   push:
-    tags:
-      - v*
+    branches:
+      - main
 
 permissions:
-  contents: write 
-
-# Automatically create a Github Release, with release details specifies (the relevent commits)
+  contents: write
 
 jobs:
-  release:
-    name: Create GitHub Release Notes
+  tag-and-release:
     runs-on: ubuntu-latest
-
-    # steps:
-    #   - name: Checkout Repository
-    #     uses: actions/checkout@v3
-
-    #   - name: Generate Release Notes
-    #     uses:  softprops/action-gh-release@v2
-    #     with:
-    #       generate_release_notes: true
-    #     env:
-    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     steps:
-      - name: Create release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.ref_name }}
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Fetch all tags
+        run: git fetch --tags
+
+      - name: Get latest tag
+        id: get_tag
         run: |
-          gh release create "$tag" \
-              --repo="$GITHUB_REPOSITORY" \
-              --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
-              --generate-notes
+          latest=$(git tag --sort=-v:refname | head -n 1)
+          echo "Latest tag: $latest"
+          if [ -z "$latest" ]; then
+            echo "tag=v0.0.0" >> $GITHUB_OUTPUT
+          else
+            echo "tag=$latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Bump patch version
+        id: bump
+        run: |
+          version=${{ steps.get_tag.outputs.tag }}
+          echo "Current version: $version"
+          parts=(${version//./ })
+          major="${parts[0]#v}"
+          minor="${parts[1]}"
+          patch="${parts[2]}"
+          next_patch=$((patch + 1))
+          new_tag="v$major.$minor.$next_patch"
+          echo "New tag: $new_tag"
+          echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
+
+      - name: Create new tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.bump.outputs.new_tag }}
+          git push origin ${{ steps.bump.outputs.new_tag }}
+
+      - name: Create GitHub Release with Notes
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.bump.outputs.new_tag }}
+          generate_release_notes: true
