@@ -1,1 +1,1 @@
-gg
+console.log('a simple file');

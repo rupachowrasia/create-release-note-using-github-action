@@ -61,60 +61,24 @@
 #               --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
 #               --generate-notes
 
-name: Auto Tag and Create Release notes
+name: Release on Tag
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'  # Trigger only on version tags like v1.0.0
 
 permissions:
-  contents: write
+  contents: write  # Required to create a release
 
 jobs:
-  tag-and-release:
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Fetch all tags
-        run: git fetch --tags
-
-      - name: Get latest tag
-        id: get_tag
-        run: |
-          latest=$(git tag --sort=-v:refname | head -n 1)
-          echo "Latest tag: $latest"
-          if [ -z "$latest" ]; then
-            echo "tag=v0.0.0" >> $GITHUB_OUTPUT
-          else
-            echo "tag=$latest" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Bump patch version
-        id: bump
-        run: |
-          version=${{ steps.get_tag.outputs.tag }}
-          echo "Current version: $version"
-          parts=(${version//./ })
-          major="${parts[0]#v}"
-          minor="${parts[1]}"
-          patch="${parts[2]}"
-          next_patch=$((patch + 1))
-          new_tag="v$major.$minor.$next_patch"
-          echo "New tag: $new_tag"
-          echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
-
-      - name: Create new tag
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag ${{ steps.bump.outputs.new_tag }}
-          git push origin ${{ steps.bump.outputs.new_tag }}
-
-      - name: Create GitHub Release with Notes
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.bump.outputs.new_tag }}
           generate_release_notes: true
