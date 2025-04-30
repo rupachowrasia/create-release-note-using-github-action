@@ -61,7 +61,7 @@
 #               --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
 #               --generate-notes
 
-name: Auto Tag and Create Release
+name: Auto Tag and Create Release notes
 
 on:
   push:
