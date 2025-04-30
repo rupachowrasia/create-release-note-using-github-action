@@ -1,1 +1,1 @@
-console.log('This is a sample file2');
+console.log('This is a sample file');
