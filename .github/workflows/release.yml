@@ -1,4 +1,4 @@
-# # Name of the workflow
+# Name of the workflow
 name: Generate Release Notes
 
 #  Run on every commit tag which begins with 'v' (e.g. v1.2.0)
@@ -10,7 +10,7 @@ on:
 permissions:
   contents: write 
 
-# # Automatically create a Github Release, with release details specifies (the relevent commits)
+# Automatically create a Github Release, with release details specifies (the relevent commits)
 
 jobs:
   release:
@@ -26,7 +26,7 @@ jobs:
         with:
           generate_release_notes: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }) #Create GitHub Release
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
 #     steps:
@@ -39,17 +39,3 @@ jobs:
 #               --repo="$GITHUB_REPOSITORY" \
 #               --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
 #               --generate-notes
-
-
-
-# jobs:
-#   release:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v3
-
-#       - name: Create GitHub Release
-#         uses: softprops/action-gh-release@v1
-#         with:
-#           generate_release_notes: true
